@@ -21,11 +21,76 @@ type IOBitReader struct {
 
 func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
 	return &IOBitReader{Reader: reader, Binary: binary,
-		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 1)}
+		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8)}
 }
 
 func (iob *IOBitReader) Read(buff []byte) (int, error) {
 	return iob.Reader.Read(buff)
+}
+
+func (iob *IOBitReader) AlignByte() {
+	if iob.OffsetBit > 0 {
+		iob.OffsetByte += 1
+		iob.OffsetBit = 0
+	}
+}
+
+func (iob *IOBitReader) GetUInt8() (uint8, error) {
+	iob.AlignByte()
+	_, err := iob.Reader.Read(iob.Buff[:1])
+	if err != nil {
+		return 0, err
+	}
+	return uint8(iob.Buff[0]), nil
+}
+
+func (iob *IOBitReader) GetUInt16() (uint16, error) {
+	iob.AlignByte()
+	_, err := iob.Reader.Read(iob.Buff[:2])
+	if err != nil {
+		return 0, err
+	}
+	return iob.Binary.Uint16(iob.Buff[:2]), nil
+}
+
+func (iob *IOBitReader) GetUInt24() (uint32, error) {
+	iob.AlignByte()
+	_, err := iob.Reader.Read(iob.Buff[:3])
+	if err != nil {
+		return 0, err
+	}
+	var v uint32
+	switch iob.Binary {
+	case BigEndian:
+		v = uint32(iob.Buff[0]) << 16
+		v += uint32(iob.Buff[1]) << 8
+		v += uint32(iob.Buff[2])
+	case LittleEndian:
+		v = uint32(iob.Buff[2]) << 16
+		v += uint32(iob.Buff[1]) << 8
+		v += uint32(iob.Buff[0])
+	default:
+		return 0, fmt.Errorf("GetUInt24 unsupported binary:%#v", iob.Binary)
+	}
+	return v, nil
+}
+
+func (iob *IOBitReader) GetUInt32() (uint32, error) {
+	iob.AlignByte()
+	_, err := iob.Reader.Read(iob.Buff[:4])
+	if err != nil {
+		return 0, err
+	}
+	return iob.Binary.Uint32(iob.Buff[:4]), nil
+}
+
+func (iob *IOBitReader) GetUIn64() (uint64, error) {
+	iob.AlignByte()
+	_, err := iob.Reader.Read(iob.Buff[:8])
+	if err != nil {
+		return 0, err
+	}
+	return iob.Binary.Uint64(iob.Buff[:8]), nil
 }
 
 func (iob *IOBitReader) GetUIBit() (uint8, error) {
