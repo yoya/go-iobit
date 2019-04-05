@@ -13,7 +13,7 @@ func main() {
 	buffio := bytes.NewBufferString("ABCDE")
 	iob := iobit.Reader(buffio, iobit.BigEndian)
 	for {
-		v, err := iob.GetUIBits(4)
+		v, err := iob.GetUIBits_uint32(4)
 		if err != nil {
 			break
 		}
