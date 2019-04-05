@@ -13,6 +13,7 @@ var BigEndian binary.ByteOrder = binary.BigEndian
 var LittleEndian binary.ByteOrder = binary.LittleEndian
 
 type IOBitReader struct {
+	// Read method
 	Reader     io.Reader
 	Binary     binary.ByteOrder
 	OffsetByte uint64
@@ -23,6 +24,10 @@ type IOBitReader struct {
 func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
 	return &IOBitReader{Reader: reader, Binary: binary,
 		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 1)}
+}
+
+func (iob *IOBitReader) Read(buff []byte) (int, error) {
+	return iob.Reader.Read(buff)
 }
 
 func (iob *IOBitReader) GetUIBit() (uint8, error) {
