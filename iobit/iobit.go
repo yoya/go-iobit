@@ -27,7 +27,7 @@ func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
 
 func (iob *IOBitReader) GetUIBit() (uint8, error) {
 	if iob.OffsetBit == 0 {
-		_, err := iob.Reader.Read(iob.Buff)
+		_, err := iob.Reader.Read(iob.Buff[:1])
 		if err != nil {
 			return 0, err
 		}
