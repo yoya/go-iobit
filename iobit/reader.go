@@ -28,11 +28,16 @@ func (iob *IOBitReader) Read(buff []byte) (int, error) {
 	return iob.Reader.Read(buff)
 }
 
-func (iob *IOBitReader) AlignByte() {
+func (iob *IOBitReader) GetOffset() (uint64, uint64) {
+	return iob.OffsetByte, iob.OffsetBit
+}
+
+func (iob *IOBitReader) AlignByte() error {
 	if iob.OffsetBit > 0 {
 		iob.OffsetByte += 1
 		iob.OffsetBit = 0
 	}
+	return nil
 }
 
 func (iob *IOBitReader) GetUInt8() (uint8, error) {
