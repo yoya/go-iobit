@@ -154,6 +154,3 @@ func (iob *IOBitWriter) PutUIBits_uint64(v uint64, n int) error {
 	}
 	return nil
 }
-
-//func (iob *IOBitWriter) PutUIBits_uint64(n int) (uint64, error) {
-//}
