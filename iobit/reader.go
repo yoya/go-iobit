@@ -118,48 +118,24 @@ func (iob *IOBitReader) GetUIBits_uint8(n int) (uint8, error) {
 	if n > 8 {
 		return 0, fmt.Errorf("GetUIBits_uint8 n:%d > 8", n)
 	}
-	var v uint8 = 0
-	for i := 0; i < n; i++ {
-		v <<= 1
-		v1, err := iob.GetUIBit()
-		if err != nil { // include io.EOF
-			return 0, err
-		}
-		v |= uint8(v1)
-	}
-	return v, nil
+	v, err := iob.GetUIBits_uint64(n)
+	return uint8(v), err
 }
 
 func (iob *IOBitReader) GetUIBits_uint16(n int) (uint16, error) {
 	if n > 16 {
 		return 0, fmt.Errorf("GetUIBits_uint16 n:%d > 16", n)
 	}
-	var v uint16 = 0
-	for i := 0; i < n; i++ {
-		v <<= 1
-		v1, err := iob.GetUIBit()
-		if err != nil { // include io.EOF
-			return 0, err
-		}
-		v |= uint16(v1)
-	}
-	return v, nil
+	v, err := iob.GetUIBits_uint64(n)
+	return uint16(v), err
 }
 
 func (iob *IOBitReader) GetUIBits_uint32(n int) (uint32, error) {
 	if n > 32 {
 		return 0, fmt.Errorf("GetUIBits_uint32 n:%d > 32", n)
 	}
-	var v uint32 = 0
-	for i := 0; i < n; i++ {
-		v <<= 1
-		v1, err := iob.GetUIBit()
-		if err != nil { // include io.EOF
-			return 0, err
-		}
-		v |= uint32(v1)
-	}
-	return v, nil
+	v, err := iob.GetUIBits_uint64(n)
+	return uint32(v), err
 }
 
 func (iob *IOBitReader) GetUIBits_uint64(n int) (uint64, error) {
