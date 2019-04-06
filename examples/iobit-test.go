@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/yoya/go-iobit/iobit"
+	"os"
 )
 
 func main() {
@@ -18,6 +19,12 @@ func main() {
 			break
 		}
 		fmt.Printf("%x ", v)
+	}
+	fmt.Println("")
+	iobw := iobit.Writer(os.Stdout, iobit.BigEndian)
+	for i := 1; i < 6; i++ {
+		_ = iobw.PutUIBits_uint8(4, 4)
+		_ = iobw.PutUIBits_uint8(uint8(i), 4)
 	}
 	fmt.Println("")
 }
