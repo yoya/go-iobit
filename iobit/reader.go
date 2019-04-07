@@ -25,6 +25,7 @@ func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
 }
 
 func (iob *IOBitReader) Read(buff []byte) (int, error) {
+	iob.OffsetByte += uint64(len(buff))
 	return iob.Reader.Read(buff)
 }
 
@@ -46,6 +47,7 @@ func (iob *IOBitReader) GetUInt8() (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
+	iob.OffsetByte += 1
 	return uint8(iob.Buff[0]), nil
 }
 
@@ -55,6 +57,7 @@ func (iob *IOBitReader) GetUInt16() (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
+	iob.OffsetByte += 2
 	return iob.Binary.Uint16(iob.Buff[:2]), nil
 }
 
@@ -77,6 +80,7 @@ func (iob *IOBitReader) GetUInt24() (uint32, error) {
 	default:
 		return 0, fmt.Errorf("GetUInt24 unsupported binary:%#v", iob.Binary)
 	}
+	iob.OffsetByte += 3
 	return v, nil
 }
 
@@ -86,6 +90,7 @@ func (iob *IOBitReader) GetUInt32() (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+	iob.OffsetByte += 4
 	return iob.Binary.Uint32(iob.Buff[:4]), nil
 }
 
@@ -95,6 +100,7 @@ func (iob *IOBitReader) GetUIn64() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	iob.OffsetByte += 8
 	return iob.Binary.Uint64(iob.Buff[:8]), nil
 }
 

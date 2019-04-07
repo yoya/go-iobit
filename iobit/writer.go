@@ -25,6 +25,7 @@ func Writer(writer io.Writer, binary binary.ByteOrder) *IOBitWriter {
 }
 
 func (iob *IOBitWriter) Write(buff []byte) (int, error) {
+	iob.OffsetByte += uint64(len(buff))
 	return iob.Writer.Write(buff)
 }
 
@@ -49,6 +50,7 @@ func (iob *IOBitWriter) PutUInt8(v uint8) error {
 	iob.AlignByte()
 	iob.Buff[0] = v
 	_, err := iob.Writer.Write(iob.Buff[:1])
+	iob.OffsetByte += 1
 	return err
 }
 
@@ -59,6 +61,7 @@ func (iob *IOBitWriter) PutUInt16(v uint16) error {
 	}
 	iob.Binary.PutUint16(iob.Buff[:2], v)
 	_, err = iob.Writer.Write(iob.Buff[:2])
+	iob.OffsetByte += 2
 	return err
 }
 
@@ -80,6 +83,7 @@ func (iob *IOBitWriter) PutUInt24(v uint32) error {
 		return fmt.Errorf("PutUInt24 unsupported binary:%#v", iob.Binary)
 	}
 	_, err = iob.Writer.Write(iob.Buff[:3])
+	iob.OffsetByte += 3
 	return err
 }
 
@@ -90,6 +94,7 @@ func (iob *IOBitWriter) PutUInt32(v uint32) error {
 	}
 	iob.Binary.PutUint32(iob.Buff[:4], v)
 	_, err = iob.Writer.Write(iob.Buff[:4])
+	iob.OffsetByte += 4
 	return err
 }
 
@@ -100,6 +105,7 @@ func (iob *IOBitWriter) PutUInt64(v uint64) error {
 	}
 	iob.Binary.PutUint64(iob.Buff[:8], v)
 	_, err = iob.Writer.Write(iob.Buff[:8])
+	iob.OffsetByte += 8
 	return err
 }
 
