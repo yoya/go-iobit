@@ -12,7 +12,7 @@ import (
 
 func main() {
 	buffio := bytes.NewBufferString("ABCDE")
-	iob := iobit.Reader(buffio, iobit.BigEndian)
+	iob := iobit.NewReader(buffio, iobit.BigEndian)
 	for {
 		v, err := iob.GetUIBits_uint32(4)
 		if err != nil {
@@ -21,7 +21,7 @@ func main() {
 		fmt.Printf("%x ", v)
 	}
 	fmt.Println("")
-	iobw := iobit.Writer(os.Stdout, iobit.BigEndian)
+	iobw := iobit.NewWriter(os.Stdout, iobit.BigEndian)
 	for i := 1; i < 6; i++ {
 		_ = iobw.PutUIBits_uint8(4, 4)
 		_ = iobw.PutUIBits_uint8(uint8(i), 4)

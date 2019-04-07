@@ -10,7 +10,7 @@ import (
 	"io"
 )
 
-type IOBitReader struct {
+type Reader struct {
 	// Read method
 	Reader     io.Reader
 	Binary     binary.ByteOrder
@@ -19,22 +19,22 @@ type IOBitReader struct {
 	Buff       []byte
 }
 
-func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
-	return &IOBitReader{Reader: reader, Binary: binary,
+func NewReader(reader io.Reader, binary binary.ByteOrder) *Reader {
+	return &Reader{Reader: reader, Binary: binary,
 		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8)}
 }
 
-func (iob *IOBitReader) Read(buff []byte) (int, error) {
+func (iob *Reader) Read(buff []byte) (int, error) {
 	iob.AlignByte()
 	iob.OffsetByte += uint64(len(buff))
 	return iob.Reader.Read(buff)
 }
 
-func (iob *IOBitReader) GetOffset() (uint64, uint64) {
+func (iob *Reader) GetOffset() (uint64, uint64) {
 	return iob.OffsetByte, iob.OffsetBit
 }
 
-func (iob *IOBitReader) AlignByte() error {
+func (iob *Reader) AlignByte() error {
 	if iob.OffsetBit > 0 {
 		iob.OffsetByte += 1
 		iob.OffsetBit = 0
@@ -42,7 +42,7 @@ func (iob *IOBitReader) AlignByte() error {
 	return nil
 }
 
-func (iob *IOBitReader) GetUInt8() (uint8, error) {
+func (iob *Reader) GetUInt8() (uint8, error) {
 	iob.AlignByte()
 	_, err := iob.Reader.Read(iob.Buff[:1])
 	if err != nil {
@@ -52,7 +52,7 @@ func (iob *IOBitReader) GetUInt8() (uint8, error) {
 	return uint8(iob.Buff[0]), nil
 }
 
-func (iob *IOBitReader) GetUInt16() (uint16, error) {
+func (iob *Reader) GetUInt16() (uint16, error) {
 	iob.AlignByte()
 	_, err := iob.Reader.Read(iob.Buff[:2])
 	if err != nil {
@@ -62,7 +62,7 @@ func (iob *IOBitReader) GetUInt16() (uint16, error) {
 	return iob.Binary.Uint16(iob.Buff[:2]), nil
 }
 
-func (iob *IOBitReader) GetUInt24() (uint32, error) {
+func (iob *Reader) GetUInt24() (uint32, error) {
 	iob.AlignByte()
 	_, err := iob.Reader.Read(iob.Buff[:3])
 	if err != nil {
@@ -85,7 +85,7 @@ func (iob *IOBitReader) GetUInt24() (uint32, error) {
 	return v, nil
 }
 
-func (iob *IOBitReader) GetUInt32() (uint32, error) {
+func (iob *Reader) GetUInt32() (uint32, error) {
 	iob.AlignByte()
 	_, err := iob.Reader.Read(iob.Buff[:4])
 	if err != nil {
@@ -95,7 +95,7 @@ func (iob *IOBitReader) GetUInt32() (uint32, error) {
 	return iob.Binary.Uint32(iob.Buff[:4]), nil
 }
 
-func (iob *IOBitReader) GetUIn64() (uint64, error) {
+func (iob *Reader) GetUIn64() (uint64, error) {
 	iob.AlignByte()
 	_, err := iob.Reader.Read(iob.Buff[:8])
 	if err != nil {
@@ -105,7 +105,7 @@ func (iob *IOBitReader) GetUIn64() (uint64, error) {
 	return iob.Binary.Uint64(iob.Buff[:8]), nil
 }
 
-func (iob *IOBitReader) GetUIBit() (uint8, error) {
+func (iob *Reader) GetUIBit() (uint8, error) {
 	if iob.OffsetBit == 0 {
 		_, err := iob.Reader.Read(iob.Buff[:1])
 		if err != nil {
@@ -121,7 +121,7 @@ func (iob *IOBitReader) GetUIBit() (uint8, error) {
 	return v, nil
 }
 
-func (iob *IOBitReader) GetUIBits_uint8(n int) (uint8, error) {
+func (iob *Reader) GetUIBits_uint8(n int) (uint8, error) {
 	if n > 8 {
 		return 0, fmt.Errorf("GetUIBits_uint8 n:%d > 8", n)
 	}
@@ -129,7 +129,7 @@ func (iob *IOBitReader) GetUIBits_uint8(n int) (uint8, error) {
 	return uint8(v), err
 }
 
-func (iob *IOBitReader) GetUIBits_uint16(n int) (uint16, error) {
+func (iob *Reader) GetUIBits_uint16(n int) (uint16, error) {
 	if n > 16 {
 		return 0, fmt.Errorf("GetUIBits_uint16 n:%d > 16", n)
 	}
@@ -137,7 +137,7 @@ func (iob *IOBitReader) GetUIBits_uint16(n int) (uint16, error) {
 	return uint16(v), err
 }
 
-func (iob *IOBitReader) GetUIBits_uint32(n int) (uint32, error) {
+func (iob *Reader) GetUIBits_uint32(n int) (uint32, error) {
 	if n > 32 {
 		return 0, fmt.Errorf("GetUIBits_uint32 n:%d > 32", n)
 	}
@@ -145,7 +145,7 @@ func (iob *IOBitReader) GetUIBits_uint32(n int) (uint32, error) {
 	return uint32(v), err
 }
 
-func (iob *IOBitReader) GetUIBits_uint64(n int) (uint64, error) {
+func (iob *Reader) GetUIBits_uint64(n int) (uint64, error) {
 	if n > 64 {
 		return 0, fmt.Errorf("GetUIBits_uint32 n:%d > 64", n)
 	}
