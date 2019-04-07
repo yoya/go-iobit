@@ -23,7 +23,7 @@ func main() {
 				}
 				break
 			}
-			fmt.Printf("%x ", v)
+			fmt.Printf("%x", v)
 			_, bitOff := iob.GetOffset()
 			if bitOff == 0 {
 				fmt.Printf(" ")
