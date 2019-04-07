@@ -19,140 +19,140 @@ type Reader struct {
 	Buff       []byte
 }
 
-func NewReader(reader io.Reader, binary binary.ByteOrder) *Reader {
-	return &Reader{Reader: reader, Binary: binary,
+func NewReader(r io.Reader, b binary.ByteOrder) *Reader {
+	return &Reader{Reader: r, Binary: b,
 		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8)}
 }
 
-func (iob *Reader) Read(buff []byte) (int, error) {
-	iob.AlignByte()
-	iob.OffsetByte += uint64(len(buff))
-	return iob.Reader.Read(buff)
+func (r *Reader) Read(buff []byte) (int, error) {
+	r.AlignByte()
+	r.OffsetByte += uint64(len(buff))
+	return r.Reader.Read(buff)
 }
 
-func (iob *Reader) GetOffset() (uint64, uint64) {
-	return iob.OffsetByte, iob.OffsetBit
+func (r *Reader) GetOffset() (uint64, uint64) {
+	return r.OffsetByte, r.OffsetBit
 }
 
-func (iob *Reader) AlignByte() error {
-	if iob.OffsetBit > 0 {
-		iob.OffsetByte += 1
-		iob.OffsetBit = 0
+func (r *Reader) AlignByte() error {
+	if r.OffsetBit > 0 {
+		r.OffsetByte += 1
+		r.OffsetBit = 0
 	}
 	return nil
 }
 
-func (iob *Reader) GetUInt8() (uint8, error) {
-	iob.AlignByte()
-	_, err := iob.Reader.Read(iob.Buff[:1])
+func (r *Reader) GetUInt8() (uint8, error) {
+	r.AlignByte()
+	_, err := r.Reader.Read(r.Buff[:1])
 	if err != nil {
 		return 0, err
 	}
-	iob.OffsetByte += 1
-	return uint8(iob.Buff[0]), nil
+	r.OffsetByte += 1
+	return uint8(r.Buff[0]), nil
 }
 
-func (iob *Reader) GetUInt16() (uint16, error) {
-	iob.AlignByte()
-	_, err := iob.Reader.Read(iob.Buff[:2])
+func (r *Reader) GetUInt16() (uint16, error) {
+	r.AlignByte()
+	_, err := r.Reader.Read(r.Buff[:2])
 	if err != nil {
 		return 0, err
 	}
-	iob.OffsetByte += 2
-	return iob.Binary.Uint16(iob.Buff[:2]), nil
+	r.OffsetByte += 2
+	return r.Binary.Uint16(r.Buff[:2]), nil
 }
 
-func (iob *Reader) GetUInt24() (uint32, error) {
-	iob.AlignByte()
-	_, err := iob.Reader.Read(iob.Buff[:3])
+func (r *Reader) GetUInt24() (uint32, error) {
+	r.AlignByte()
+	_, err := r.Reader.Read(r.Buff[:3])
 	if err != nil {
 		return 0, err
 	}
 	var v uint32
-	switch iob.Binary {
+	switch r.Binary {
 	case BigEndian:
-		v = uint32(iob.Buff[0]) << 16
-		v += uint32(iob.Buff[1]) << 8
-		v += uint32(iob.Buff[2])
+		v = uint32(r.Buff[0]) << 16
+		v += uint32(r.Buff[1]) << 8
+		v += uint32(r.Buff[2])
 	case LittleEndian:
-		v = uint32(iob.Buff[2]) << 16
-		v += uint32(iob.Buff[1]) << 8
-		v += uint32(iob.Buff[0])
+		v = uint32(r.Buff[2]) << 16
+		v += uint32(r.Buff[1]) << 8
+		v += uint32(r.Buff[0])
 	default:
-		return 0, fmt.Errorf("GetUInt24 unsupported binary:%#v", iob.Binary)
+		return 0, fmt.Errorf("GetUInt24 unsupported binary:%#v", r.Binary)
 	}
-	iob.OffsetByte += 3
+	r.OffsetByte += 3
 	return v, nil
 }
 
-func (iob *Reader) GetUInt32() (uint32, error) {
-	iob.AlignByte()
-	_, err := iob.Reader.Read(iob.Buff[:4])
+func (r *Reader) GetUInt32() (uint32, error) {
+	r.AlignByte()
+	_, err := r.Reader.Read(r.Buff[:4])
 	if err != nil {
 		return 0, err
 	}
-	iob.OffsetByte += 4
-	return iob.Binary.Uint32(iob.Buff[:4]), nil
+	r.OffsetByte += 4
+	return r.Binary.Uint32(r.Buff[:4]), nil
 }
 
-func (iob *Reader) GetUIn64() (uint64, error) {
-	iob.AlignByte()
-	_, err := iob.Reader.Read(iob.Buff[:8])
+func (r *Reader) GetUIn64() (uint64, error) {
+	r.AlignByte()
+	_, err := r.Reader.Read(r.Buff[:8])
 	if err != nil {
 		return 0, err
 	}
-	iob.OffsetByte += 8
-	return iob.Binary.Uint64(iob.Buff[:8]), nil
+	r.OffsetByte += 8
+	return r.Binary.Uint64(r.Buff[:8]), nil
 }
 
-func (iob *Reader) GetUIBit() (uint8, error) {
-	if iob.OffsetBit == 0 {
-		_, err := iob.Reader.Read(iob.Buff[:1])
+func (r *Reader) GetUIBit() (uint8, error) {
+	if r.OffsetBit == 0 {
+		_, err := r.Reader.Read(r.Buff[:1])
 		if err != nil {
 			return 0, err
 		}
 	}
-	v := (uint8(iob.Buff[0]) >> (7 - iob.OffsetBit)) & 1
-	iob.OffsetBit += 1
-	if iob.OffsetBit > 7 {
-		iob.OffsetByte += 1
-		iob.OffsetBit -= 8
+	v := (uint8(r.Buff[0]) >> (7 - r.OffsetBit)) & 1
+	r.OffsetBit += 1
+	if r.OffsetBit > 7 {
+		r.OffsetByte += 1
+		r.OffsetBit -= 8
 	}
 	return v, nil
 }
 
-func (iob *Reader) GetUIBits_uint8(n int) (uint8, error) {
+func (r *Reader) GetUIBits_uint8(n int) (uint8, error) {
 	if n > 8 {
 		return 0, fmt.Errorf("GetUIBits_uint8 n:%d > 8", n)
 	}
-	v, err := iob.GetUIBits_uint64(n)
+	v, err := r.GetUIBits_uint64(n)
 	return uint8(v), err
 }
 
-func (iob *Reader) GetUIBits_uint16(n int) (uint16, error) {
+func (r *Reader) GetUIBits_uint16(n int) (uint16, error) {
 	if n > 16 {
 		return 0, fmt.Errorf("GetUIBits_uint16 n:%d > 16", n)
 	}
-	v, err := iob.GetUIBits_uint64(n)
+	v, err := r.GetUIBits_uint64(n)
 	return uint16(v), err
 }
 
-func (iob *Reader) GetUIBits_uint32(n int) (uint32, error) {
+func (r *Reader) GetUIBits_uint32(n int) (uint32, error) {
 	if n > 32 {
 		return 0, fmt.Errorf("GetUIBits_uint32 n:%d > 32", n)
 	}
-	v, err := iob.GetUIBits_uint64(n)
+	v, err := r.GetUIBits_uint64(n)
 	return uint32(v), err
 }
 
-func (iob *Reader) GetUIBits_uint64(n int) (uint64, error) {
+func (r *Reader) GetUIBits_uint64(n int) (uint64, error) {
 	if n > 64 {
 		return 0, fmt.Errorf("GetUIBits_uint32 n:%d > 64", n)
 	}
 	var v uint64 = 0
 	for i := 0; i < n; i++ {
 		v <<= 1
-		v1, err := iob.GetUIBit()
+		v1, err := r.GetUIBit()
 		if err != nil { // include io.EOF
 			return 0, err
 		}
