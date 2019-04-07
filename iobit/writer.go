@@ -25,6 +25,7 @@ func Writer(writer io.Writer, binary binary.ByteOrder) *IOBitWriter {
 }
 
 func (iob *IOBitWriter) Write(buff []byte) (int, error) {
+	iob.AlignByte()
 	iob.OffsetByte += uint64(len(buff))
 	return iob.Writer.Write(buff)
 }

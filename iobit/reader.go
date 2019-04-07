@@ -25,6 +25,7 @@ func Reader(reader io.Reader, binary binary.ByteOrder) *IOBitReader {
 }
 
 func (iob *IOBitReader) Read(buff []byte) (int, error) {
+	iob.AlignByte()
 	iob.OffsetByte += uint64(len(buff))
 	return iob.Reader.Read(buff)
 }
