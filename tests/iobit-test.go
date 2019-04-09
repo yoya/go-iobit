@@ -21,7 +21,7 @@ func main() {
 		fmt.Printf("%x ", v)
 	}
 	fmt.Println("")
-	iobw := iobit.NewWriter(os.Stdout, iobit.BigEndian)
+	var iobw iobit.Writer = iobit.NewWriter(os.Stdout, iobit.BigEndian)
 	for i := 1; i < 6; i++ {
 		_ = iobw.PutUIBits_uint8(4, 4)
 		_ = iobw.PutUIBits_uint8(uint8(i), 4)

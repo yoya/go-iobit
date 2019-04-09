@@ -10,7 +10,23 @@ import (
 	"io"
 )
 
-type Writer struct {
+type Writer interface {
+	Write(buff []byte) (int, error)
+	GetOffset() (uint64, uint64)
+	AlignByte() error
+	PutUInt8(v uint8) error
+	PutUInt16(v uint16) error
+	PutUInt24(v uint32) error
+	PutUInt32(v uint32) error
+	PutUInt64(v uint64) error
+	PutUIBit(v uint8) error
+	PutUIBits_uint8(v uint8, n int) error
+	PutUIBits_uint16(v uint16, n int) error
+	PutUIBits_uint32(v uint32, n int) error
+	PutUIBits_uint64(v uint64, n int) error
+}
+
+type IOBitWriter struct {
 	// Write method
 	Writer     io.Writer
 	Binary     binary.ByteOrder
@@ -19,22 +35,22 @@ type Writer struct {
 	Buff       []byte
 }
 
-func NewWriter(w io.Writer, b binary.ByteOrder) *Writer {
-	return &Writer{Writer: w, Binary: b,
+func NewWriter(w io.Writer, b binary.ByteOrder) *IOBitWriter {
+	return &IOBitWriter{Writer: w, Binary: b,
 		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8)}
 }
 
-func (w *Writer) Write(buff []byte) (int, error) {
+func (w *IOBitWriter) Write(buff []byte) (int, error) {
 	w.AlignByte()
 	w.OffsetByte += uint64(len(buff))
 	return w.Writer.Write(buff)
 }
 
-func (w *Writer) GetOffset() (uint64, uint64) {
+func (w *IOBitWriter) GetOffset() (uint64, uint64) {
 	return w.OffsetByte, w.OffsetBit
 }
 
-func (w *Writer) AlignByte() error {
+func (w *IOBitWriter) AlignByte() error {
 	if w.OffsetBit > 0 {
 		_, err := w.Writer.Write(w.Buff[:1])
 		if err != nil {
@@ -47,7 +63,7 @@ func (w *Writer) AlignByte() error {
 	return nil
 }
 
-func (w *Writer) PutUInt8(v uint8) error {
+func (w *IOBitWriter) PutUInt8(v uint8) error {
 	w.AlignByte()
 	w.Buff[0] = v
 	_, err := w.Writer.Write(w.Buff[:1])
@@ -55,7 +71,7 @@ func (w *Writer) PutUInt8(v uint8) error {
 	return err
 }
 
-func (w *Writer) PutUInt16(v uint16) error {
+func (w *IOBitWriter) PutUInt16(v uint16) error {
 	err := w.AlignByte()
 	if err != nil {
 		return err
@@ -66,7 +82,7 @@ func (w *Writer) PutUInt16(v uint16) error {
 	return err
 }
 
-func (w *Writer) PutUInt24(v uint32) error {
+func (w *IOBitWriter) PutUInt24(v uint32) error {
 	err := w.AlignByte()
 	if err != nil {
 		return err
@@ -88,7 +104,7 @@ func (w *Writer) PutUInt24(v uint32) error {
 	return err
 }
 
-func (w *Writer) PutUInt32(v uint32) error {
+func (w *IOBitWriter) PutUInt32(v uint32) error {
 	err := w.AlignByte()
 	if err != nil {
 		return err
@@ -99,7 +115,7 @@ func (w *Writer) PutUInt32(v uint32) error {
 	return err
 }
 
-func (w *Writer) PutUInt64(v uint64) error {
+func (w *IOBitWriter) PutUInt64(v uint64) error {
 	err := w.AlignByte()
 	if err != nil {
 		return err
@@ -110,7 +126,7 @@ func (w *Writer) PutUInt64(v uint64) error {
 	return err
 }
 
-func (w *Writer) PutUIBit(v uint8) error {
+func (w *IOBitWriter) PutUIBit(v uint8) error {
 	if v == 1 {
 		w.Buff[0] = w.Buff[0] | (1 << uint8(7-w.OffsetBit))
 	}
@@ -127,28 +143,28 @@ func (w *Writer) PutUIBit(v uint8) error {
 	return nil
 }
 
-func (w *Writer) PutUIBits_uint8(v uint8, n int) error {
+func (w *IOBitWriter) PutUIBits_uint8(v uint8, n int) error {
 	if n > 8 {
 		return fmt.Errorf("PutUIBits_uint8 n:%d > 8", n)
 	}
 	return w.PutUIBits_uint64(uint64(v), n)
 }
 
-func (w *Writer) PutUIBits_uint16(v uint16, n int) error {
+func (w *IOBitWriter) PutUIBits_uint16(v uint16, n int) error {
 	if n > 16 {
 		return fmt.Errorf("PutUIBits_uint16 n:%d > 16", n)
 	}
 	return w.PutUIBits_uint64(uint64(v), n)
 }
 
-func (w *Writer) PutUIBits_uint32(v uint32, n int) error {
+func (w *IOBitWriter) PutUIBits_uint32(v uint32, n int) error {
 	if n > 32 {
 		return fmt.Errorf("PutUIBits_uint32 n:%d > 32", n)
 	}
 	return w.PutUIBits_uint64(uint64(v), n)
 }
 
-func (w *Writer) PutUIBits_uint64(v uint64, n int) error {
+func (w *IOBitWriter) PutUIBits_uint64(v uint64, n int) error {
 	if n > 64 {
 		return fmt.Errorf("PutUIBits_uint64 n:%d > 64", n)
 	}
