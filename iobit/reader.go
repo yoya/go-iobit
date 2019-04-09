@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"io/ioutil"
 )
 
 type Reader struct {
@@ -28,6 +29,13 @@ func (r *Reader) Read(buff []byte) (int, error) {
 	r.AlignByte()
 	r.OffsetByte += uint64(len(buff))
 	return r.Reader.Read(buff)
+}
+
+func (r *Reader) ReadAll() ([]byte, error) {
+	r.AlignByte()
+	buff, err := ioutil.ReadAll(r)
+	r.OffsetByte += uint64(len(buff))
+	return buff, err
 }
 
 func (r *Reader) GetOffset() (uint64, uint64) {
