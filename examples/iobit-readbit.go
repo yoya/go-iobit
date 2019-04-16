@@ -16,7 +16,8 @@ func main() {
 		buffio := bytes.NewBufferString(arg)
 		iob := iobit.NewReader(buffio, iobit.BigEndian)
 		for {
-			v, err := iob.GetUIBit()
+			v := iob.GetUIBit()
+			err := iob.GetLastError()
 			if err != nil {
 				if err != io.EOF {
 					fmt.Println(err)
