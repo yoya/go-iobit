@@ -24,8 +24,11 @@ func main() {
 	fmt.Println("")
 	var iobw iobit.Writer = iobit.NewWriter(os.Stdout, iobit.BigEndian)
 	for i := 1; i < 6; i++ {
-		_ = iobw.PutUIBits_uint8(4, 4)
-		_ = iobw.PutUIBits_uint8(uint8(i), 4)
+		iobw.PutUIBits_uint8(4, 4)
+		iobw.PutUIBits_uint8(uint8(i), 4)
 	}
-	fmt.Println("")
+	fmt.Println()
+	if iobw.GetLastError() != nil {
+		fmt.Println(iobw.GetLastError())
+	}
 }
