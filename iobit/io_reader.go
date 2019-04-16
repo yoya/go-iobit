@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 )
 
-type IOBitReader struct {
+type IOReader struct {
 	// Read method
 	Reader     io.Reader
 	Binary     binary.ByteOrder
@@ -21,13 +21,13 @@ type IOBitReader struct {
 	lastError  error
 }
 
-func NewReader(r io.Reader, b binary.ByteOrder) *IOBitReader {
-	return &IOBitReader{Reader: r, Binary: b,
+func NewIOReader(r io.Reader, b binary.ByteOrder) *IOReader {
+	return &IOReader{Reader: r, Binary: b,
 		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8),
 		lastError: nil}
 }
 
-func (r *IOBitReader) Read(buff []byte) (int, error) {
+func (r *IOReader) Read(buff []byte) (int, error) {
 	if r.lastError != nil {
 		return 0, r.lastError
 	}
@@ -38,7 +38,7 @@ func (r *IOBitReader) Read(buff []byte) (int, error) {
 	return n, r.lastError
 }
 
-func (r *IOBitReader) ReadAll() ([]byte, error) {
+func (r *IOReader) ReadAll() ([]byte, error) {
 	if r.lastError != nil {
 		return nil, r.lastError
 	}
@@ -49,11 +49,11 @@ func (r *IOBitReader) ReadAll() ([]byte, error) {
 	return buff, nil
 }
 
-func (r *IOBitReader) GetOffset() (uint64, uint64) {
+func (r *IOReader) GetOffset() (uint64, uint64) {
 	return r.OffsetByte, r.OffsetBit
 }
 
-func (r *IOBitReader) AlignByte() {
+func (r *IOReader) AlignByte() {
 	if r.lastError != nil {
 		return
 	}
@@ -63,7 +63,7 @@ func (r *IOBitReader) AlignByte() {
 	}
 }
 
-func (r *IOBitReader) GetUInt8() uint8 {
+func (r *IOReader) GetUInt8() uint8 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -76,7 +76,7 @@ func (r *IOBitReader) GetUInt8() uint8 {
 	return uint8(r.Buff[0])
 }
 
-func (r *IOBitReader) GetUInt16() uint16 {
+func (r *IOReader) GetUInt16() uint16 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -89,7 +89,7 @@ func (r *IOBitReader) GetUInt16() uint16 {
 	return r.Binary.Uint16(r.Buff[:2])
 }
 
-func (r *IOBitReader) GetUInt24() uint32 {
+func (r *IOReader) GetUInt24() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -116,7 +116,7 @@ func (r *IOBitReader) GetUInt24() uint32 {
 	return v
 }
 
-func (r *IOBitReader) GetUInt32() uint32 {
+func (r *IOReader) GetUInt32() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -129,7 +129,7 @@ func (r *IOBitReader) GetUInt32() uint32 {
 	return r.Binary.Uint32(r.Buff[:4])
 }
 
-func (r *IOBitReader) GetUIn64() uint64 {
+func (r *IOReader) GetUIn64() uint64 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -142,7 +142,7 @@ func (r *IOBitReader) GetUIn64() uint64 {
 	return r.Binary.Uint64(r.Buff[:8])
 }
 
-func (r *IOBitReader) GetUIBit() uint8 {
+func (r *IOReader) GetUIBit() uint8 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -161,7 +161,7 @@ func (r *IOBitReader) GetUIBit() uint8 {
 	return v
 }
 
-func (r *IOBitReader) GetUIBits_uint8(n int) uint8 {
+func (r *IOReader) GetUIBits_uint8(n int) uint8 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -173,7 +173,7 @@ func (r *IOBitReader) GetUIBits_uint8(n int) uint8 {
 	return uint8(v)
 }
 
-func (r *IOBitReader) GetUIBits_uint16(n int) uint16 {
+func (r *IOReader) GetUIBits_uint16(n int) uint16 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -185,7 +185,7 @@ func (r *IOBitReader) GetUIBits_uint16(n int) uint16 {
 	return uint16(v)
 }
 
-func (r *IOBitReader) GetUIBits_uint32(n int) uint32 {
+func (r *IOReader) GetUIBits_uint32(n int) uint32 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -197,7 +197,7 @@ func (r *IOBitReader) GetUIBits_uint32(n int) uint32 {
 	return uint32(v)
 }
 
-func (r *IOBitReader) GetUIBits_uint64(n int) uint64 {
+func (r *IOReader) GetUIBits_uint64(n int) uint64 {
 	if r.lastError != nil {
 		return 0
 	}
@@ -218,7 +218,7 @@ func (r *IOBitReader) GetUIBits_uint64(n int) uint64 {
 	return v
 }
 
-func (r *IOBitReader) GetLastError() error {
+func (r *IOReader) GetLastError() error {
 	if r.lastError == nil {
 		return nil
 	}
