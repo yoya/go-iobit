@@ -12,17 +12,17 @@ import (
 
 type IOWriter struct {
 	// Write method
-	Writer     io.Writer
-	Binary     binary.ByteOrder
-	OffsetByte uint64
-	OffsetBit  uint64
-	Buff       []byte
+	writer     io.Writer
+	binary     binary.ByteOrder
+	offsetByte uint64
+	offsetBit  uint64
+	buff       []byte
 	lastError  error
 }
 
 func NewIOWriter(w io.Writer, b binary.ByteOrder) *IOWriter {
-	return &IOWriter{Writer: w, Binary: b,
-		OffsetByte: 0, OffsetBit: 0, Buff: make([]byte, 8)}
+	return &IOWriter{writer: w, binary: b,
+		offsetByte: 0, offsetBit: 0, buff: make([]byte, 8)}
 }
 
 func (w *IOWriter) Write(buff []byte) (int, error) {
@@ -31,25 +31,25 @@ func (w *IOWriter) Write(buff []byte) (int, error) {
 		return 0, w.lastError
 	}
 	var n int
-	n, w.lastError = w.Writer.Write(buff)
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(buff)
+	w.offsetByte += uint64(n)
 	return n, w.lastError
 }
 
 func (w *IOWriter) GetOffset() (uint64, uint64) {
-	return w.OffsetByte, w.OffsetBit
+	return w.offsetByte, w.offsetBit
 }
 
 func (w *IOWriter) AlignByte() {
 	if w.lastError != nil {
 		return
 	}
-	if w.OffsetBit > 0 {
+	if w.offsetBit > 0 {
 		var n int
-		n, w.lastError = w.Writer.Write(w.Buff[:1])
-		w.OffsetByte += uint64(n)
-		w.OffsetBit = 0
-		w.Buff[0] = 0
+		n, w.lastError = w.writer.Write(w.buff[:1])
+		w.offsetByte += uint64(n)
+		w.offsetBit = 0
+		w.buff[0] = 0
 	}
 }
 
@@ -58,10 +58,10 @@ func (w *IOWriter) PutUInt8(v uint8) {
 	if w.lastError != nil {
 		return
 	}
-	w.Buff[0] = v
+	w.buff[0] = v
 	var n int
-	n, w.lastError = w.Writer.Write(w.Buff[:1])
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(w.buff[:1])
+	w.offsetByte += uint64(n)
 	if w.lastError != nil {
 		return
 	}
@@ -72,10 +72,10 @@ func (w *IOWriter) PutUInt16(v uint16) {
 	if w.lastError != nil {
 		return
 	}
-	w.Binary.PutUint16(w.Buff[:2], v)
+	w.binary.PutUint16(w.buff[:2], v)
 	var n int
-	n, w.lastError = w.Writer.Write(w.Buff[:2])
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(w.buff[:2])
+	w.offsetByte += uint64(n)
 }
 
 func (w *IOWriter) PutUInt24(v uint32) {
@@ -83,22 +83,22 @@ func (w *IOWriter) PutUInt24(v uint32) {
 	if w.lastError != nil {
 		return
 	}
-	switch w.Binary {
+	switch w.binary {
 	case BigEndian:
-		w.Buff[0] = uint8((v << 16) & 0xff)
-		w.Buff[1] = uint8((v << 8) & 0xff)
-		w.Buff[2] = uint8((v) & 0xff)
+		w.buff[0] = uint8((v << 16) & 0xff)
+		w.buff[1] = uint8((v << 8) & 0xff)
+		w.buff[2] = uint8((v) & 0xff)
 	case LittleEndian:
-		w.Buff[2] = uint8((v << 16) & 0xff)
-		w.Buff[1] = uint8((v << 8) & 0xff)
-		w.Buff[0] = uint8((v) & 0xff)
+		w.buff[2] = uint8((v << 16) & 0xff)
+		w.buff[1] = uint8((v << 8) & 0xff)
+		w.buff[0] = uint8((v) & 0xff)
 	default:
-		w.lastError = fmt.Errorf("PutUInt24 unsupported binary:%#v", w.Binary)
+		w.lastError = fmt.Errorf("PutUInt24 unsupported binary:%#v", w.binary)
 		return
 	}
 	var n int
-	n, w.lastError = w.Writer.Write(w.Buff[:3])
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(w.buff[:3])
+	w.offsetByte += uint64(n)
 }
 
 func (w *IOWriter) PutUInt32(v uint32) {
@@ -106,10 +106,10 @@ func (w *IOWriter) PutUInt32(v uint32) {
 	if w.lastError != nil {
 		return
 	}
-	w.Binary.PutUint32(w.Buff[:4], v)
+	w.binary.PutUint32(w.buff[:4], v)
 	var n int
-	n, w.lastError = w.Writer.Write(w.Buff[:4])
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(w.buff[:4])
+	w.offsetByte += uint64(n)
 }
 
 func (w *IOWriter) PutUInt64(v uint64) {
@@ -117,10 +117,10 @@ func (w *IOWriter) PutUInt64(v uint64) {
 	if w.lastError != nil {
 		return
 	}
-	w.Binary.PutUint64(w.Buff[:8], v)
+	w.binary.PutUint64(w.buff[:8], v)
 	var n int
-	n, w.lastError = w.Writer.Write(w.Buff[:8])
-	w.OffsetByte += uint64(n)
+	n, w.lastError = w.writer.Write(w.buff[:8])
+	w.offsetByte += uint64(n)
 }
 
 func (w *IOWriter) PutUIBit(v uint8) {
@@ -128,20 +128,20 @@ func (w *IOWriter) PutUIBit(v uint8) {
 		return
 	}
 	if v == 1 {
-		w.Buff[0] = w.Buff[0] | (1 << uint8(7-w.OffsetBit))
+		w.buff[0] = w.buff[0] | (1 << uint8(7-w.offsetBit))
 	}
-	w.OffsetBit += 1
-	if w.OffsetBit > 7 {
+	w.offsetBit += 1
+	if w.offsetBit > 7 {
 		var n int
-		n, w.lastError = w.Writer.Write(w.Buff[:1])
+		n, w.lastError = w.writer.Write(w.buff[:1])
 		if n > 0 {
-			w.OffsetByte += uint64(n)
-			w.OffsetBit -= 8
+			w.offsetByte += uint64(n)
+			w.offsetBit -= 8
 		}
 		if w.lastError != nil {
 			return
 		}
-		w.Buff[0] = 0
+		w.buff[0] = 0
 	}
 }
 
@@ -203,6 +203,6 @@ func (r *IOWriter) GetLastError() error {
 		return r.lastError
 	}
 	err := fmt.Errorf("%s in offset(%d:%d)",
-		r.lastError, r.OffsetByte, r.OffsetBit)
+		r.lastError, r.offsetByte, r.offsetBit)
 	return err
 }
