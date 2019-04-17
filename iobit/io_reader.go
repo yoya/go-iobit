@@ -32,9 +32,9 @@ func (r *IOReader) Read(buff []byte) (int, error) {
 	if r.lastError != nil {
 		return 0, r.lastError
 	}
-	r.OffsetByte += uint64(len(buff))
 	var n int
 	n, r.lastError = r.Reader.Read(buff)
+	r.OffsetByte += uint64(n)
 	return n, r.lastError
 }
 
@@ -68,11 +68,12 @@ func (r *IOReader) GetUInt8() uint8 {
 	if r.lastError != nil {
 		return 0
 	}
-	_, r.lastError = r.Reader.Read(r.Buff[:1])
+	var n int
+	n, r.lastError = r.Reader.Read(r.Buff[:1])
+	r.OffsetByte += uint64(n)
 	if r.lastError != nil {
 		return 0
 	}
-	r.OffsetByte += 1
 	return uint8(r.Buff[0])
 }
 
@@ -81,11 +82,12 @@ func (r *IOReader) GetUInt16() uint16 {
 	if r.lastError != nil {
 		return 0
 	}
-	_, r.lastError = r.Reader.Read(r.Buff[:2])
+	var n int
+	n, r.lastError = r.Reader.Read(r.Buff[:2])
+	r.OffsetByte += uint64(n)
 	if r.lastError != nil {
 		return 0
 	}
-	r.OffsetByte += 2
 	return r.Binary.Uint16(r.Buff[:2])
 }
 
@@ -94,7 +96,9 @@ func (r *IOReader) GetUInt24() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
-	_, r.lastError = r.Reader.Read(r.Buff[:3])
+	var n int
+	n, r.lastError = r.Reader.Read(r.Buff[:3])
+	r.OffsetByte += uint64(n)
 	if r.lastError != nil {
 		return 0
 	}
@@ -112,7 +116,6 @@ func (r *IOReader) GetUInt24() uint32 {
 		r.lastError = fmt.Errorf("GetUInt24 unsupported binary:%#v", r.Binary)
 		v = 0
 	}
-	r.OffsetByte += 3
 	return v
 }
 
@@ -121,11 +124,12 @@ func (r *IOReader) GetUInt32() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
-	_, r.lastError = r.Reader.Read(r.Buff[:4])
+	var n int
+	n, r.lastError = r.Reader.Read(r.Buff[:4])
+	r.OffsetByte += uint64(n)
 	if r.lastError != nil {
 		return 0
 	}
-	r.OffsetByte += 4
 	return r.Binary.Uint32(r.Buff[:4])
 }
 
@@ -134,11 +138,12 @@ func (r *IOReader) GetUIn64() uint64 {
 	if r.lastError != nil {
 		return 0
 	}
-	_, r.lastError = r.Reader.Read(r.Buff[:8])
+	var n int
+	n, r.lastError = r.Reader.Read(r.Buff[:8])
+	r.OffsetByte += uint64(n)
 	if r.lastError != nil {
 		return 0
 	}
-	r.OffsetByte += 8
 	return r.Binary.Uint64(r.Buff[:8])
 }
 
@@ -147,7 +152,9 @@ func (r *IOReader) GetUIBit() uint8 {
 		return 0
 	}
 	if r.OffsetBit == 0 {
-		_, r.lastError = r.Reader.Read(r.Buff[:1])
+		var n int
+		n, r.lastError = r.Reader.Read(r.Buff[:1])
+		r.OffsetByte += uint64(n)
 		if r.lastError != nil {
 			return 0
 		}
