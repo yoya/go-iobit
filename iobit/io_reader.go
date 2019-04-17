@@ -28,10 +28,10 @@ func NewIOReader(r io.Reader, b binary.ByteOrder) *IOReader {
 }
 
 func (r *IOReader) Read(buff []byte) (int, error) {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0, r.lastError
 	}
-	r.AlignByte()
 	r.OffsetByte += uint64(len(buff))
 	var n int
 	n, r.lastError = r.Reader.Read(buff)
@@ -39,10 +39,10 @@ func (r *IOReader) Read(buff []byte) (int, error) {
 }
 
 func (r *IOReader) ReadAll() ([]byte, error) {
+	r.AlignByte()
 	if r.lastError != nil {
 		return nil, r.lastError
 	}
-	r.AlignByte()
 	var buff []byte
 	buff, r.lastError = ioutil.ReadAll(r)
 	r.OffsetByte += uint64(len(buff))
@@ -64,10 +64,10 @@ func (r *IOReader) AlignByte() {
 }
 
 func (r *IOReader) GetUInt8() uint8 {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0
 	}
-	r.AlignByte()
 	_, r.lastError = r.Reader.Read(r.Buff[:1])
 	if r.lastError != nil {
 		return 0
@@ -77,10 +77,10 @@ func (r *IOReader) GetUInt8() uint8 {
 }
 
 func (r *IOReader) GetUInt16() uint16 {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0
 	}
-	r.AlignByte()
 	_, r.lastError = r.Reader.Read(r.Buff[:2])
 	if r.lastError != nil {
 		return 0
@@ -90,10 +90,10 @@ func (r *IOReader) GetUInt16() uint16 {
 }
 
 func (r *IOReader) GetUInt24() uint32 {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0
 	}
-	r.AlignByte()
 	_, r.lastError = r.Reader.Read(r.Buff[:3])
 	if r.lastError != nil {
 		return 0
@@ -117,10 +117,10 @@ func (r *IOReader) GetUInt24() uint32 {
 }
 
 func (r *IOReader) GetUInt32() uint32 {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0
 	}
-	r.AlignByte()
 	_, r.lastError = r.Reader.Read(r.Buff[:4])
 	if r.lastError != nil {
 		return 0
@@ -130,10 +130,10 @@ func (r *IOReader) GetUInt32() uint32 {
 }
 
 func (r *IOReader) GetUIn64() uint64 {
+	r.AlignByte()
 	if r.lastError != nil {
 		return 0
 	}
-	r.AlignByte()
 	_, r.lastError = r.Reader.Read(r.Buff[:8])
 	if r.lastError != nil {
 		return 0
