@@ -49,6 +49,11 @@ func (r *IOReader) ReadAll() ([]byte, error) {
 	return buff, nil
 }
 
+func (r *IOReader) ReadUntil(elim byte, return_include_elim bool) ([]byte, error) {
+	r.lastError = fmt.Errorf("%s", "ReadUntil: Not implemented yet")
+	return make([]byte, 0), r.lastError
+}
+
 func (r *IOReader) GetOffset() (uint64, uint64) {
 	return r.offsetByte, r.offsetBit
 }

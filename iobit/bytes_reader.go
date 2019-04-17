@@ -65,6 +65,11 @@ func (r *BytesReader) ReadAll() ([]byte, error) {
 	return buff, r.lastError
 }
 
+func (r *BytesReader) ReadUntil(elim byte, return_include_elim bool) ([]byte, error) {
+	r.lastError = fmt.Errorf("%s", "ReadUntil: Not implemented yet")
+	return make([]byte, 0), r.lastError
+}
+
 func (r *BytesReader) GetOffset() (uint64, uint64) {
 	return r.offsetByte, r.offsetBit
 }

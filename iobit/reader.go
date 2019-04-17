@@ -7,6 +7,7 @@ package iobit
 type Reader interface {
 	Read(buff []byte) (int, error)
 	ReadAll() ([]byte, error)
+	ReadUntil(byte, bool) ([]byte, error)
 	GetOffset() (uint64, uint64)
 	AlignByte()
 	GetUInt8() uint8
