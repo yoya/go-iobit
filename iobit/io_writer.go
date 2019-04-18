@@ -127,6 +127,9 @@ func (w *IOWriter) PutUIBit(v uint8) {
 	if w.lastError != nil {
 		return
 	}
+	if w.offsetBit == 0 {
+		w.buff[0] = 0
+	}
 	if v == 1 {
 		w.buff[0] = w.buff[0] | (1 << uint8(7-w.offsetBit))
 	}
