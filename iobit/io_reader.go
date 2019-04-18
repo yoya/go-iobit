@@ -30,28 +30,28 @@ func NewIOReader(r io.Reader, b binary.ByteOrder) *IOReader {
 func (r *IOReader) Read(buff []byte) (int, error) {
 	r.AlignByte()
 	if r.lastError != nil {
-		return 0, r.lastError
+		return 0, r.GetLastError()
 	}
 	var n int
 	n, r.lastError = r.reader.Read(buff)
 	r.offsetByte += uint64(n)
-	return n, r.lastError
+	return n, r.GetLastError()
 }
 
 func (r *IOReader) ReadAll() ([]byte, error) {
 	r.AlignByte()
 	if r.lastError != nil {
-		return nil, r.lastError
+		return nil, r.GetLastError()
 	}
 	var buff []byte
 	buff, r.lastError = ioutil.ReadAll(r)
 	r.offsetByte += uint64(len(buff))
-	return buff, nil
+	return buff, r.GetLastError()
 }
 
 func (r *IOReader) ReadUntil(elim byte, return_include_elim bool) ([]byte, error) {
 	r.lastError = fmt.Errorf("%s", "ReadUntil: Not implemented yet")
-	return make([]byte, 0), r.lastError
+	return make([]byte, 0), r.GetLastError()
 }
 
 func (r *IOReader) GetOffset() (uint64, uint64) {
@@ -258,8 +258,11 @@ func (r *IOReader) GetLastError() error {
 	if r.lastError == nil {
 		return nil
 	}
-	if r.lastError == io.EOF {
-		return r.lastError
+	if r.lastError == EOF || r.lastError == io.EOF {
+		return EOF
+	}
+	if r.lastError == ErrUnexpectedEOF || r.lastError == io.ErrUnexpectedEOF {
+		return ErrUnexpectedEOF
 	}
 	err := fmt.Errorf("%s in offset(%d:%d)",
 		r.lastError, r.offsetByte, r.offsetBit)

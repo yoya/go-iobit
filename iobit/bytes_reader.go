@@ -28,13 +28,13 @@ func NewBytesReader(bytes []byte, b binary.ByteOrder) *BytesReader {
 func (r *BytesReader) Read(buff []byte) (int, error) {
 	r.AlignByte()
 	if r.lastError != nil {
-		return 0, r.lastError
+		return 0, r.GetLastError()
 	}
 	buff_len := int(len(buff))
 	remain_len := int(len(r.bytes)) - int(r.offsetByte)
 	if remain_len == 0 {
 		r.lastError = EOF
-		return 0, r.lastError
+		return 0, r.GetLastError()
 	}
 
 	var n int
@@ -46,23 +46,23 @@ func (r *BytesReader) Read(buff []byte) (int, error) {
 	}
 	copy(buff, r.bytes[r.offsetByte:int(r.offsetByte)+n])
 	r.offsetByte += uint64(n)
-	return n, r.lastError
+	return n, r.GetLastError()
 }
 
 func (r *BytesReader) ReadAll() ([]byte, error) {
 	r.AlignByte()
 	if r.lastError != nil {
-		return nil, r.lastError
+		return nil, r.GetLastError()
 	}
 	remain_len := int(len(r.bytes)) - int(r.offsetByte)
 	buff := make([]byte, remain_len)
 	_, r.lastError = r.Read(buff)
-	return buff, r.lastError
+	return buff, r.GetLastError()
 }
 
 func (r *BytesReader) ReadUntil(elim byte, return_include_elim bool) ([]byte, error) {
 	r.lastError = fmt.Errorf("%s", "ReadUntil: Not implemented yet")
-	return make([]byte, 0), r.lastError
+	return make([]byte, 0), r.GetLastError()
 }
 
 func (r *BytesReader) GetOffset() (uint64, uint64) {
@@ -271,6 +271,9 @@ func (r *BytesReader) GetLastError() error {
 	}
 	if r.lastError == EOF {
 		return r.lastError
+	}
+	if r.lastError == ErrUnexpectedEOF {
+		return ErrUnexpectedEOF
 	}
 	err := fmt.Errorf("%s in offset(%d:%d)",
 		r.lastError, r.offsetByte, r.offsetBit)
