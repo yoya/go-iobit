@@ -6,7 +6,6 @@ package iobit
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 )
 

@@ -5,6 +5,10 @@ package iobit
  */
 
 // imitate io package
+import (
+	"errors"
+)
+
 var EOF = errors.New("EOF")
 var ErrUnexpectedEOF = errors.New("unexpected EOF")
 
