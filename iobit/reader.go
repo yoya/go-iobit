@@ -22,7 +22,7 @@ type Reader interface {
 	GetUInt16() uint16
 	GetUInt24() uint32
 	GetUInt32() uint32
-	GetUIn64() uint64
+	GetUInt64() uint64
 	GetUIBit() uint8
 	GetUIBits_uint8(n int) uint8
 	GetUIBits_uint16(n int) uint16

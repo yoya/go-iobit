@@ -149,7 +149,7 @@ func (r *BytesReader) GetUInt32() uint32 {
 	return r.binary.Uint32(r.buff[:4])
 }
 
-func (r *BytesReader) GetUIn64() uint64 {
+func (r *BytesReader) GetUInt64() uint64 {
 	r.AlignByte()
 	if r.lastError != nil {
 		return 0
