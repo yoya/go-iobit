@@ -15,14 +15,21 @@ type BytesReader struct {
 	binary     binary.ByteOrder
 	offsetByte uint64
 	offsetBit  uint64
-	buff       []byte
 	lastError  error
 }
 
 func NewBytesReader(bytes []byte, b binary.ByteOrder) *BytesReader {
 	return &BytesReader{bytes: bytes, binary: b,
-		offsetByte: 0, offsetBit: 0, buff: make([]byte, 8),
+		offsetByte: 0, offsetBit: 0,
 		lastError: nil}
+}
+
+func (r *BytesReader) hasNext(n int) bool {
+	remain_len := int(len(r.bytes)) - int(r.offsetByte)
+	if remain_len < n {
+		return false
+	}
+	return true
 }
 
 func (r *BytesReader) Read(buff []byte) (int, error) {
@@ -84,13 +91,13 @@ func (r *BytesReader) GetUInt8() uint8 {
 	if r.lastError != nil {
 		return 0
 	}
-	var n int
-	n, r.lastError = r.Read(r.buff[:1])
-	r.offsetByte += uint64(n)
-	if r.lastError != nil {
+	if r.hasNext(1) == false {
+		r.lastError = EOF
 		return 0
 	}
-	return uint8(r.buff[0])
+	v := r.bytes[r.offsetByte]
+	r.offsetByte += uint64(1)
+	return uint8(v)
 }
 
 func (r *BytesReader) GetUInt16() uint16 {
@@ -98,13 +105,17 @@ func (r *BytesReader) GetUInt16() uint16 {
 	if r.lastError != nil {
 		return 0
 	}
-	var n int
-	n, r.lastError = r.Read(r.buff[:2])
-	r.offsetByte += uint64(n)
-	if r.lastError != nil {
+	if r.hasNext(2) == false {
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+		} else {
+			r.lastError = ErrUnexpectedEOF
+		}
 		return 0
 	}
-	return r.binary.Uint16(r.buff[:2])
+	v := r.binary.Uint16(r.bytes[r.offsetByte : r.offsetByte+2])
+	r.offsetByte += uint64(2)
+	return v
 }
 
 func (r *BytesReader) GetUInt24() uint32 {
@@ -112,22 +123,26 @@ func (r *BytesReader) GetUInt24() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
-	var n int
-	n, r.lastError = r.Read(r.buff[:3])
-	r.offsetByte += uint64(n)
-	if r.lastError != nil {
+	if r.hasNext(3) == false {
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+		} else {
+			r.lastError = ErrUnexpectedEOF
+		}
 		return 0
 	}
+	buff := r.bytes[r.offsetByte : r.offsetByte+3]
+	r.offsetByte += uint64(3)
 	var v uint32
 	switch r.binary {
 	case BigEndian:
-		v = uint32(r.buff[0]) << 16
-		v += uint32(r.buff[1]) << 8
-		v += uint32(r.buff[2])
+		v = uint32(buff[0]) << 16
+		v += uint32(buff[1]) << 8
+		v += uint32(buff[2])
 	case LittleEndian:
-		v = uint32(r.buff[2]) << 16
-		v += uint32(r.buff[1]) << 8
-		v += uint32(r.buff[0])
+		v = uint32(buff[2]) << 16
+		v += uint32(buff[1]) << 8
+		v += uint32(buff[0])
 	default:
 		r.lastError = fmt.Errorf("GetUInt24 unsupported binary:%#v", r.binary)
 		v = 0
@@ -140,13 +155,17 @@ func (r *BytesReader) GetUInt32() uint32 {
 	if r.lastError != nil {
 		return 0
 	}
-	var n int
-	n, r.lastError = r.Read(r.buff[:4])
-	r.offsetByte += uint64(n)
-	if r.lastError != nil {
+	if r.hasNext(4) == false {
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+		} else {
+			r.lastError = ErrUnexpectedEOF
+		}
 		return 0
 	}
-	return r.binary.Uint32(r.buff[:4])
+	v := r.binary.Uint32(r.bytes[r.offsetByte : r.offsetByte+4])
+	r.offsetByte += uint64(4)
+	return v
 }
 
 func (r *BytesReader) GetUInt64() uint64 {
@@ -154,13 +173,17 @@ func (r *BytesReader) GetUInt64() uint64 {
 	if r.lastError != nil {
 		return 0
 	}
-	var n int
-	n, r.lastError = r.Read(r.buff[:8])
-	r.offsetByte += uint64(n)
-	if r.lastError != nil {
+	if r.hasNext(8) == false {
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+		} else {
+			r.lastError = ErrUnexpectedEOF
+		}
 		return 0
 	}
-	return r.binary.Uint64(r.buff[:8])
+	v := r.binary.Uint64(r.bytes[r.offsetByte : r.offsetByte+8])
+	r.offsetByte += uint64(4)
+	return v
 }
 
 func (r *BytesReader) GetUIBit() uint8 {
@@ -168,14 +191,18 @@ func (r *BytesReader) GetUIBit() uint8 {
 		return 0
 	}
 	if r.offsetBit == 0 {
-		var n int
-		n, r.lastError = r.Read(r.buff[:1])
-		r.offsetByte += uint64(n)
-		if r.lastError != nil {
-			return 0
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+		}
+	} else {
+		if r.hasNext(0) == false {
+			r.lastError = ErrUnexpectedEOF
 		}
 	}
-	v := (uint8(r.buff[0]) >> (7 - r.offsetBit)) & 1
+	if r.lastError != nil {
+		return 0
+	}
+	v := (uint8(r.bytes[r.offsetByte]) >> (7 - r.offsetBit)) & 1
 	r.offsetBit += 1
 	if r.offsetBit > 7 {
 		r.offsetByte += 1
@@ -246,11 +273,15 @@ func (r *BytesReader) GetBytes(n int) []byte {
 	if r.lastError != nil {
 		return nil
 	}
-	buff := make([]byte, n)
-	n, r.lastError = r.Read(buff)
-	if r.lastError != nil {
-		return nil
+	if r.hasNext(n) == false {
+		if r.hasNext(1) == false {
+			r.lastError = EOF
+			return nil
+		}
+		r.lastError = ErrUnexpectedEOF
 	}
+	buff := r.bytes[r.offsetByte : int(r.offsetByte)+n]
+	r.offsetByte += uint64(len(buff))
 	return buff
 }
 func (r *BytesReader) GetString(n int) string {
