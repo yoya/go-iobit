@@ -246,6 +246,30 @@ func (r *BytesReader) GetUIBits_uint64(n int) uint64 {
 	return v
 }
 
+func (r *BytesReader) GetBytes(n int) []byte {
+	r.AlignByte()
+	if r.lastError != nil {
+		return nil
+	}
+	buff := make([]byte, n)
+	n, r.lastError = r.Read(buff)
+	if r.lastError != nil {
+		return nil
+	}
+	return buff
+}
+func (r *BytesReader) GetString(n int) string {
+	r.AlignByte()
+	if r.lastError != nil {
+		return ""
+	}
+	buff := r.GetBytes(n)
+	if r.lastError != nil {
+		return ""
+	}
+	return string(buff)
+}
+
 func (r *BytesReader) GetLastError() error {
 	if r.lastError == nil {
 		return nil

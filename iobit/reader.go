@@ -20,5 +20,7 @@ type Reader interface {
 	GetUIBits_uint16(n int) uint16
 	GetUIBits_uint32(n int) uint32
 	GetUIBits_uint64(n int) uint64
+	GetBytes(n int) []byte
+	GetString(n int) string
 	GetLastError() error
 }
