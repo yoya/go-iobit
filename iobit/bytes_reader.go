@@ -10,10 +10,6 @@ import (
 	"fmt"
 )
 
-// imitate io package
-var EOF = errors.New("EOF")
-var ErrUnexpectedEOF = errors.New("unexpected EOF")
-
 type BytesReader struct {
 	// Read method
 	bytes      []byte

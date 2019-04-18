@@ -4,6 +4,10 @@ package iobit
  * Copyright 2019/04/06- yoya@awm.jp. All rights reserved.
  */
 
+// imitate io package
+var EOF = errors.New("EOF")
+var ErrUnexpectedEOF = errors.New("unexpected EOF")
+
 type Reader interface {
 	Read(buff []byte) (int, error)
 	ReadAll() ([]byte, error)
