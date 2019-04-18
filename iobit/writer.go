@@ -18,5 +18,7 @@ type Writer interface {
 	PutUIBits_uint16(v uint16, n int)
 	PutUIBits_uint32(v uint32, n int)
 	PutUIBits_uint64(v uint64, n int)
+	PutBytes([]byte)
+	PutString(string)
 	GetLastError() error
 }

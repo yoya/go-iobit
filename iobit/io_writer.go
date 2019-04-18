@@ -195,6 +195,21 @@ func (w *IOWriter) PutUIBits_uint64(v uint64, n int) {
 	}
 }
 
+func (w *IOWriter) PutBytes(bytes []byte) {
+	if w.lastError != nil {
+		return
+	}
+	var n int
+	n, w.lastError = w.writer.Write(bytes)
+	w.offsetByte += uint64(n)
+}
+func (w *IOWriter) PutString(str string) {
+	if w.lastError != nil {
+		return
+	}
+	w.PutBytes([]byte(str))
+}
+
 func (r *IOWriter) GetLastError() error {
 	if r.lastError == nil {
 		return nil
