@@ -44,7 +44,7 @@ func (r *IOReader) ReadAll() ([]byte, error) {
 		return nil, r.GetLastError()
 	}
 	var buff []byte
-	buff, r.lastError = ioutil.ReadAll(r)
+	buff, r.lastError = ioutil.ReadAll(r.reader)
 	r.offsetByte += uint64(len(buff))
 	return buff, r.GetLastError()
 }
