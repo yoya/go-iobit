@@ -16,7 +16,6 @@ func main() {
 	for {
 		v := iob.GetUIBits_uint32(4)
 		if iob.GetLastError() != nil {
-
 			break
 		}
 		fmt.Printf("%x ", v)
