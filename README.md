@@ -28,7 +28,7 @@ fmt.Printf("%x\n", v)
 
 ### factory
 
-- func NewWriter(writer io.Writer, binary binary.ByteOrder) *Writer {
+- func NewWriter(writer io.Writer, binary binary.ByteOrder) *Writer
 
 ### method
 
